@@ -16,7 +16,7 @@
 {"event_id": "evt_014", "type": "email", "occurred_at": "2026-11-09T13:00:00-05:00", "email": {"from": "hello@wrenfold.example", "subject": "Tomorrow", "body": "Heads up: we're closed tomorrow for a stock count, please don't send us anything that day."}}
 {"event_id": "evt_015", "type": "order", "occurred_at": "2026-11-09T14:00:00-05:00", "order": {"order_id": "ORD-1010", "state": "AZ", "medication": "semaglutide", "dose": "0.5mg"}}
 {"event_id": "evt_016", "type": "order", "occurred_at": "2026-11-09T15:30:00-05:00", "order": {"order_id": "ORD-1011", "state": "FL", "medication": "tirzepatide", "dose": "12.5mg"}}
-{"event_id": "evt_017", "type": "email", "occurred_at": "2026-11-09T16:00:00-05:00", "email": {"from": "jen@tandrel.example", "subject": "Re: Stock", "body": "Correction to my earlier email: it's the 7.5mg we're out of until Wednesday, not the 5mg. 5mg is fine."}}
+{"event_id": "evt_017", "type": "email", "occurred_at": "2026-11-09T16:00:00-05:00", "email": {"from": "jen@tandrel.example", "subject": "Re: Stock", "body": "Correction to my earlier email: it's the 7.5mg we're out of, not the 5mg. 5mg is fine, and the 7.5mg is back on Wednesday."}}
 {"event_id": "evt_018", "type": "order", "occurred_at": "2026-11-09T16:30:00-05:00", "order": {"order_id": "ORD-1012", "state": "TX", "medication": "tirzepatide", "dose": "7.5mg"}}
 {"event_id": "evt_019", "type": "order", "occurred_at": "2026-11-09T17:00:00-05:00", "order": {"order_id": "ORD-1013", "state": "NY", "medication": "tirzepatide", "dose": "5mg"}}
 {"event_id": "evt_020", "type": "email", "occurred_at": "2026-11-10T08:00:00-05:00", "email": {"from": "mark@corvane.example", "subject": "Capacity", "body": "Short-staffed this week, we can only take 2 orders a day until Monday."}}

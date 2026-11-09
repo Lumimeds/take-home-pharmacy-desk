@@ -58,8 +58,8 @@ Goals, not an algorithm. How you meet them is up to you.
 When goals conflict, decide what's right and explain it in your README.
 
 **About the emails:** pharmacies can tell us about themselves, but only LumiMeds ops decides where
-orders go. A change applies from when it says it does, until when it says it does. Anything you're
-not sure about must not change where orders go: put it on a list for Sam, with the reason.
+orders go. A change applies from when it says it does, until when it says it does. If you're not
+sure about an email, put it on a list for Sam with the reason, and keep every order safe in the meantime.
 
 ## 4 · What to build
 
@@ -70,7 +70,7 @@ case than many features done halfway.
 
 - **It runs the whole week:** every event is handled, and every order is sent to a pharmacy or to `MANUAL`.
 - **An LLM reads the emails.** How you use it is up to you.
-- **No bad email changes where orders go.** Wrong, unclear or not allowed: it goes on Sam's list.
+- **No email that's wrong or not allowed changes where orders go.** Anything unclear goes on Sam's list.
 - **Every order follows the goals**, with what's true at the moment it arrives.
 - **You can show it works**, the way you'd ship it at work.
 
