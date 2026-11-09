@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 // LumiMeds pharmacy-desk simulator. Plain Node 18+, no dependencies. Works with an app in any language.
 //
-// Replays a week of events, in time order and one at a time, as POSTs to ONE webhook URL (the event
-// type is in the body). It waits for each reply before sending the next event. It also plays the
-// pharmacy API that your app sends orders to. If your app replies first and works in the background,
-// the simulator keeps the pharmacy API open at the end until every order has arrived (--drain).
+// Replays a week of events as POSTs to ONE webhook URL (the event type is in the body), one at a time:
+// the next event goes out when your app replies, or after --timeout. Some events are delivered more
+// than once (same event_id). It also plays the pharmacy API that your app sends orders to.
 //
 //   node sim/sim.mjs --target http://localhost:3000/webhooks
 //     [--week sim/week-a.jsonl] [--log out/run-log.jsonl] [--deliveries out/deliveries.jsonl]
 //     [--pharmacy-port 4000] [--timeout 30000] [--wait 15] [--drain 60] [--quiet] [--ping]
 //
 //   --ping   send only simulation.started, the first email and the first order (checks your wiring)
-//   --wait   seconds to keep retrying while your app is still starting up
-//   --drain  seconds to wait at the end for orders your app is still working on
+//   --wait   seconds to keep retrying an event while your app can't be reached (starting, restarting)
+//   --drain  seconds to wait at the end for orders that haven't been sent yet
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createServer } from "node:http";
 import { dirname } from "node:path";
@@ -37,11 +36,18 @@ try {
 
 // Fail fast on a broken week file (we write these by hand).
 if (events[0]?.type !== "simulation.started") fail("week file must start with a simulation.started event");
-if (new Set(events.map((e) => e.event_id)).size !== events.length) fail("duplicate event_id in week file");
-events.forEach((e, i) => {
+// A repeated event_id is a redelivery and must be an exact copy. Only first deliveries must be in time order.
+const firstOf = new Map();
+let lastFirst = null;
+for (const e of events) {
   if (Number.isNaN(Date.parse(e.occurred_at))) fail(`${e.event_id} has no valid occurred_at`);
-  if (i > 0 && Date.parse(e.occurred_at) < Date.parse(events[i - 1].occurred_at)) fail(`${e.event_id} is earlier than the event before it`);
-});
+  if (firstOf.has(e.event_id)) {
+    if (JSON.stringify(firstOf.get(e.event_id)) !== JSON.stringify(e)) fail(`${e.event_id} appears twice with different contents`);
+    continue;
+  }
+  if (lastFirst && Date.parse(e.occurred_at) < Date.parse(lastFirst.occurred_at)) fail(`${e.event_id} is earlier than the event before it`);
+  firstOf.set(e.event_id, e); lastFirst = e;
+}
 if (flag("ping")) events = [events[0], events.find((e) => e.type === "email"), events.find((e) => e.type === "order")].filter(Boolean);
 
 let current = events[0];
@@ -50,7 +56,8 @@ const sent = new Map();
 const log = [];
 const deliveries = [];
 const problems = [];
-const orderEventOf = new Map(events.filter((e) => e.type === "order").map((e) => [e.order.order_id, e]));
+const orderEventOf = new Map();
+for (const e of events) if (e.type === "order" && !orderEventOf.has(e.order.order_id)) orderEventOf.set(e.order.order_id, e);
 
 // The pharmacy API. Sending an order is final: a second send for the same order is refused.
 const reply = (res, status, body) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(body)); };
@@ -64,8 +71,11 @@ const server = createServer((req, res) => {
     if (typeof body?.order_id !== "string" || typeof body?.pharmacy !== "string")
       return reply(res, 400, { error: 'expected { "order_id": string, "pharmacy": string (an id or "MANUAL"), "reason"?: string }' });
     if (!orderEventOf.has(body.order_id)) return reply(res, 404, { error: `unknown order ${body.order_id}` });
-    if (sent.has(body.order_id)) return reply(res, 409, { error: "already sent" });
-    // "late" = sent after your app had already replied to that order's event. Fine if you queue work.
+    if (sent.has(body.order_id)) {
+      problems.push(`${body.order_id} was sent to the pharmacy API more than once`);
+      return reply(res, 409, { error: "already sent" });
+    }
+    // "late" = sent after your app had already replied to that order's event.
     const ev = orderEventOf.get(body.order_id);
     const late = ev.event_id !== current.event_id || replied.has(ev.event_id);
     const entry = { order_id: body.order_id, pharmacy: body.pharmacy, reason: body.reason ?? null, sim_time: ev.occurred_at, during_event: current.event_id, late };
@@ -84,9 +94,13 @@ const what = (e) =>
   e.type === "email" ? `${e.email.from} "${e.email.subject}"` :
   e.type === "order" ? `${e.order.order_id} ${e.order.state} ${e.order.medication} ${e.order.dose}` : "starting config";
 
+// If your app can't be reached (starting up, restarting, crashed mid-request), keep retrying the same
+// event for up to --wait seconds before giving up.
+const UNREACHABLE = new Set(["ECONNREFUSED", "ECONNRESET", "UND_ERR_SOCKET", "EPIPE"]);
 async function deliver(e) {
   const body = e.type === "simulation.started" ? { ...e, pharmacyApi } : e;
   const deadline = Date.now() + waitSec * 1000;
+  let told = false;
   for (;;) {
     try {
       return await fetch(target, {
@@ -96,15 +110,21 @@ async function deliver(e) {
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (err) {
-      const refused = (err?.cause?.code ?? err?.code) === "ECONNREFUSED";
-      if (refused && e === events[0] && Date.now() < deadline) { await new Promise((r) => setTimeout(r, 250)); continue; }
+      if (UNREACHABLE.has(err?.cause?.code ?? err?.code) && Date.now() < deadline) {
+        if (!told && !quiet && e !== events[0]) { console.log(`  can't reach your app; retrying ${e.event_id} for up to ${waitSec}s…`); told = true; }
+        await new Promise((r) => setTimeout(r, 250));
+        continue;
+      }
       throw err;
     }
   }
 }
 
+const delivered = new Set();
 for (const e of events) {
   current = e;
+  const again = delivered.has(e.event_id);
+  delivered.add(e.event_id);
   const before = log.length;
   const t0 = performance.now();
   let status = null, error = null;
@@ -124,16 +144,16 @@ for (const e of events) {
   const ms = Math.round(performance.now() - t0);
   const ordersSent = log.slice(before).filter((x) => !x.late).map((x) => `${x.order_id}→${x.pharmacy}`);
   if (error) problems.push(`${e.event_id} ${e.type}: ${error}`);
-  deliveries.push({ event_id: e.event_id, type: e.type, occurred_at: e.occurred_at, status, ms, orders_sent: ordersSent, error });
-  if (!quiet) console.log(`[${when(e.occurred_at)}] ${e.event_id} ${e.type.padEnd(18)} ${what(e).padEnd(42)} → ${status ?? "—"} in ${ms} ms` +
+  deliveries.push({ event_id: e.event_id, type: e.type, occurred_at: e.occurred_at, redelivery: again, status, ms, orders_sent: ordersSent, error });
+  if (!quiet) console.log(`[${when(e.occurred_at)}] ${e.event_id} ${(e.type + (again ? " (again)" : "")).padEnd(18)} ${what(e).padEnd(42)} → ${status ?? "—"} in ${ms} ms` +
     (ordersSent.length ? ` · sent ${ordersSent.join(", ")}` : "") + (error ? `  ✗ ${error}` : ""));
 }
 
-// If your app works in the background, wait for the orders it's still working on (up to --drain).
-const orderEvents = events.filter((e) => e.type === "order");
+// Wait for orders that haven't been sent yet (up to --drain).
+const orderEvents = [...orderEventOf.values()];
 const outstanding = () => orderEvents.filter((e) => !sent.has(e.order.order_id)).length;
 if (outstanding() > 0 && drainSec > 0) {
-  if (!quiet) console.log(`waiting up to ${drainSec}s for ${outstanding()} order(s) your app is still working on…`);
+  if (!quiet) console.log(`waiting up to ${drainSec}s for ${outstanding()} order(s) not sent yet…`);
   const deadline = Date.now() + drainSec * 1000;
   while (outstanding() > 0 && Date.now() < deadline) await new Promise((r) => setTimeout(r, 100));
 }
@@ -149,7 +169,7 @@ for (const p of [...new Set(problems)]) console.error(`✗ ${p}`);
 console.log(`delivered ${deliveries.filter((d) => d.status && d.status < 300).length} of ${events.length} events; ` +
   `${log.length} of ${orderEvents.length} orders sent to a pharmacy or MANUAL` +
   (problems.length ? `; ${new Set(problems).size} problem(s)` : "; no problems") +
-  (late ? `\n  ${late} order(s) were sent after your app had replied: fine if you process in the background` : "") +
+  (late ? `\n  ${late} order(s) were sent after your app had replied to them` : "") +
   `\n→ ${logPath}, ${deliveriesPath}`);
 await stop();
 process.exit(problems.length ? 1 : 0);

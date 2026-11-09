@@ -40,9 +40,9 @@ The exact contract is in **[`sim/README.md`](sim/README.md)**. Read it before yo
 
 ## 2 · One event at a time
 
-The simulator sends the next event only after your app replies to the current one, so a whole week
-replays in a minute or two, in the right order. Use the time on each event as "now", never the
-computer's clock.
+The simulator sends events one at a time, in time order: the next one goes out when your app replies,
+so a whole week replays in a minute or two. Like real webhooks, an event can be delivered more than
+once. Use the time on each event as "now", never the computer's clock.
 
 ## 3 · Business goals, in priority order
 
@@ -85,7 +85,7 @@ When the core works, **commit with the message `core done`**.
 | 🟡 | **Sam's live desk** | A page that updates as the week replays: each pharmacy, how many orders it's had today, and Sam's list. Sam can approve a held change, and it applies from that moment. |
 | 🟡 | **Explain any decision** | Answer, after the fact: "Why did ORD-2011 go where it went?" and "What did we believe about Velmora on Tuesday at 10:00?" |
 | 🔴 | **Ask the desk** | Sam asks in plain English, like "Who can take a NY tirzepatide 7.5mg order right now?". An LLM answers from your app's actual state, says when it doesn't know, and never changes anything itself. |
-| 🔴 | **Production webhooks** | Reply to every webhook within 100 ms (`--timeout 100`), do the work in the background, and still send every order to the right place. |
+| 🔴 | **Survive a restart** | Stop your app in the middle of the week and start it again. The week still completes, with nothing lost and nothing done twice. |
 
 A bonus only counts if the core works. One done properly beats three half-done.
 
@@ -122,7 +122,7 @@ what else it needs) and a `README` covering:
 - what you chose not to do, and why
 - which rules you found ambiguous, and what you decided
 - anything you know is wrong or untested
-- how you'd handle webhooks in production (see the note in `sim/README.md`)
+- what you'd change before running this in production
 - how you used AI, and one place where you didn't accept what it gave you
 
 We may follow up with some questions about your solution.

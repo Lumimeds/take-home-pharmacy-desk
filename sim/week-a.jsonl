@@ -12,6 +12,7 @@
 {"event_id": "evt_011", "type": "order", "occurred_at": "2026-11-09T11:00:00-05:00", "order": {"order_id": "ORD-1007", "state": "CA", "medication": "tirzepatide", "dose": "10mg"}}
 {"event_id": "evt_012", "type": "order", "occurred_at": "2026-11-09T11:30:00-05:00", "order": {"order_id": "ORD-1008", "state": "CA", "medication": "tirzepatide", "dose": "2.5mg"}}
 {"event_id": "evt_013", "type": "order", "occurred_at": "2026-11-09T12:00:00-05:00", "order": {"order_id": "ORD-1009", "state": "NJ", "medication": "tirzepatide", "dose": "2.5mg"}}
+{"event_id": "evt_011", "type": "order", "occurred_at": "2026-11-09T11:00:00-05:00", "order": {"order_id": "ORD-1007", "state": "CA", "medication": "tirzepatide", "dose": "10mg"}}
 {"event_id": "evt_014", "type": "email", "occurred_at": "2026-11-09T13:00:00-05:00", "email": {"from": "hello@wrenfold.example", "subject": "Tomorrow", "body": "Heads up: we're closed tomorrow for a stock count, please don't send us anything that day."}}
 {"event_id": "evt_015", "type": "order", "occurred_at": "2026-11-09T14:00:00-05:00", "order": {"order_id": "ORD-1010", "state": "AZ", "medication": "semaglutide", "dose": "0.5mg"}}
 {"event_id": "evt_016", "type": "order", "occurred_at": "2026-11-09T15:30:00-05:00", "order": {"order_id": "ORD-1011", "state": "FL", "medication": "tirzepatide", "dose": "12.5mg"}}
@@ -20,6 +21,7 @@
 {"event_id": "evt_019", "type": "order", "occurred_at": "2026-11-09T17:00:00-05:00", "order": {"order_id": "ORD-1013", "state": "NY", "medication": "tirzepatide", "dose": "5mg"}}
 {"event_id": "evt_020", "type": "email", "occurred_at": "2026-11-10T08:00:00-05:00", "email": {"from": "mark@corvane.example", "subject": "Capacity", "body": "Short-staffed this week, we can only take 2 orders a day until Monday."}}
 {"event_id": "evt_021", "type": "order", "occurred_at": "2026-11-10T08:30:00-05:00", "order": {"order_id": "ORD-2001", "state": "AZ", "medication": "semaglutide", "dose": "0.5mg"}}
+{"event_id": "evt_020", "type": "email", "occurred_at": "2026-11-10T08:00:00-05:00", "email": {"from": "mark@corvane.example", "subject": "Capacity", "body": "Short-staffed this week, we can only take 2 orders a day until Monday."}}
 {"event_id": "evt_022", "type": "email", "occurred_at": "2026-11-10T09:02:00-05:00", "email": {"from": "john@tandrel.example", "subject": "Texas", "body": "Sam - we can't do Texas anymore, effective immediately."}}
 {"event_id": "evt_023", "type": "order", "occurred_at": "2026-11-10T09:15:00-05:00", "order": {"order_id": "ORD-2002", "state": "TX", "medication": "tirzepatide", "dose": "5mg"}}
 {"event_id": "evt_024", "type": "order", "occurred_at": "2026-11-10T09:30:00-05:00", "order": {"order_id": "ORD-2003", "state": "TX", "medication": "semaglutide", "dose": "1mg"}}
@@ -34,6 +36,7 @@
 {"event_id": "evt_033", "type": "order", "occurred_at": "2026-11-10T15:30:00-05:00", "order": {"order_id": "ORD-2011", "state": "CA", "medication": "tirzepatide", "dose": "10mg"}}
 {"event_id": "evt_034", "type": "order", "occurred_at": "2026-11-10T16:00:00-05:00", "order": {"order_id": "ORD-2012", "state": "AZ", "medication": "semaglutide", "dose": "1mg"}}
 {"event_id": "evt_035", "type": "order", "occurred_at": "2026-11-10T16:30:00-05:00", "order": {"order_id": "ORD-2013", "state": "TX", "medication": "tirzepatide", "dose": "10mg"}}
+{"event_id": "evt_032", "type": "order", "occurred_at": "2026-11-10T15:00:00-05:00", "order": {"order_id": "ORD-2010", "state": "CA", "medication": "tirzepatide", "dose": "5mg"}}
 {"event_id": "evt_036", "type": "order", "occurred_at": "2026-11-11T08:30:00-05:00", "order": {"order_id": "ORD-3001", "state": "CA", "medication": "tirzepatide", "dose": "7.5mg"}}
 {"event_id": "evt_037", "type": "order", "occurred_at": "2026-11-11T09:00:00-05:00", "order": {"order_id": "ORD-3002", "state": "FL", "medication": "tirzepatide", "dose": "12.5mg"}}
 {"event_id": "evt_038", "type": "order", "occurred_at": "2026-11-11T09:15:00-05:00", "order": {"order_id": "ORD-3003", "state": "NY", "medication": "semaglutide", "dose": "0.5mg"}}

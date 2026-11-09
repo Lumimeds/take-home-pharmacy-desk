@@ -59,17 +59,14 @@ Every event has an `event_id`, a `type` and an `occurred_at`. The same values al
 
 ## How events are delivered
 
-1. **In time order, one at a time.** The next event is only sent after you reply to the current one.
-2. **The simple way: reply only after you've finished handling the event and saved any changes.**
-   Your reply is how the simulator knows it can move on. It waits up to 30 seconds (`--timeout`),
-   so calling an AI model inside the handler is fine.
-3. **Any 2xx reply counts as success**: 200, 201, 202 or 204. The reply body is ignored.
-
-> That isn't how you'd build webhooks in production, where you'd acknowledge immediately and process
-> in the background. The simple way is enough. If you do want to work in the background, the
-> simulator copes: orders sent after you've replied are fine, and at the end it waits up to
-> 60 seconds (`--drain`) for orders you're still working on. Whether every order went to the right
-> place is up to you. Either way, tell us in your README how you'd do it for real.
+1. **One at a time, in time order.** The simulator sends the next event when your app replies to
+   the current one, or after 30 seconds (`--timeout`) if it doesn't.
+2. **Any 2xx reply counts as success**: 200, 201, 202 or 204. The reply body is ignored.
+3. **At least once.** An event can be delivered more than once. A redelivery is an exact copy, with
+   the same `event_id`.
+4. **If your app can't be reached**, the simulator keeps retrying the same event for 15 seconds
+   (`--wait`) before giving up.
+5. **At the end**, it waits up to 60 seconds (`--drain`) for orders that haven't been sent yet.
 
 ## Time
 
@@ -79,8 +76,7 @@ There's no "a new day has started" event: only emails and orders.
 
 ## The pharmacy API
 
-Send each order to a pharmacy, or to `MANUAL`. The simple way is to do it while you're handling its
-`order` event, before you reply:
+Send each order to a pharmacy, or to `MANUAL`:
 
 ```
 POST {pharmacyApi}/pharmacy-orders
@@ -112,8 +108,8 @@ POST {pharmacyApi}/pharmacy-orders
 | `--week` | `sim/week-a.jsonl` | Which week to replay |
 | `--ping` | off | Send only the start event, one email and one order |
 | `--timeout` | `30000` | Milliseconds to wait for your reply |
-| `--wait` | `15` | Seconds to keep retrying while your app is still starting up |
-| `--drain` | `60` | Seconds to wait at the end for orders your app is still working on |
+| `--wait` | `15` | Seconds to keep retrying an event while your app can't be reached |
+| `--drain` | `60` | Seconds to wait at the end for orders that haven't been sent yet |
 | `--pharmacy-port` | `4000` | Port for the pharmacy API (the URL arrives in `pharmacyApi`) |
 | `--log`, `--deliveries` | `out/…` | Where to write the two logs |
 | `--quiet` | off | No per-event lines |
@@ -126,5 +122,6 @@ POST {pharmacyApi}/pharmacy-orders
 | `can't start the pharmacy API on port 4000` | Another program is using the port. Use `--pharmacy-port 4100` |
 | `your app replied HTTP 4xx/5xx` | Your handler threw, or your framework didn't parse the JSON body |
 | `no reply within 30000 ms` | Your handler hung or is too slow. The simulator moves on without it |
-| `ORD-… was never sent to a pharmacy (or MANUAL)` | You never called `/pharmacy-orders` for it, or your background work hadn't finished within `--drain` seconds |
-| `order(s) were sent after your app had replied` | Not an error: it's information, for when you process in the background |
+| `ORD-… was never sent to a pharmacy (or MANUAL)` | `/pharmacy-orders` was never called for that order, at least not within `--drain` seconds of the last event |
+| `ORD-… was sent to the pharmacy API more than once` | The same order was sent again (the second send was refused with `409`) |
+| `order(s) were sent after your app had replied to them` | Information, not an error |
