@@ -10,7 +10,7 @@ runs. This README has the details.
 |  |  |
 |---|---|
 | ⏱️ **Two hours** | A hard stop. How you split the time is up to you. |
-| 🧰 **Any TypeScript stack** | Set it up yourself. Keep it simple: we judge what you build, not the framework. |
+| 🧰 **Any TypeScript stack** | Use whatever you're comfortable with, set it up yourself, and tell us why you chose it. |
 | 🤖 **AI welcome** | Use it as much as you like. You're responsible for what ships. |
 | 🛟 **Safe first** | An order sent to a pharmacy that can't fill it outweighs everything else. |
 
@@ -117,6 +117,7 @@ A link to your Git repository, with your code (runnable with `npm install && npm
 what else it needs) and a `README` covering:
 
 - what you built and how to run it
+- which stack you chose, and why
 - why you're confident it works
 - how you decide where an order goes, and what you do when the goals conflict
 - what you chose not to do, and why
