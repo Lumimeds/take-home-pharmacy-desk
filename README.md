@@ -9,7 +9,7 @@ runs. This README has the details.
 
 |  |  |
 |---|---|
-| ⏱️ **Two hours** | A hard stop. How you split the time is up to you. |
+| ⏱️ **Two hours, then 15 minutes** | Two hours to build, then up to 15 minutes to write your README. Both are hard stops. How you split the building time is up to you. |
 | 🧰 **Any TypeScript stack** | Use whatever you're comfortable with, set it up yourself, and tell us why you chose it. |
 | 🤖 **AI welcome** | Use it as much as you like. You're responsible for what ships. |
 | 🛟 **Safe first** | An order sent to a pharmacy that can't fill it outweighs everything else. |
@@ -109,7 +109,8 @@ spending cap. Put it in `.env` and never commit it. You can use your own key if 
 - **Then quality:** following ops instructions, using `MANUAL` only when needed, fast and cheap delivery.
 - **Your judgment:** what you chose to do and not do, and why.
 
-**Quality over quantity.** Stop when the two hours are up, even mid-feature, and tell us where you stopped.
+**Quality over quantity.** Stop building when the two hours are up, even mid-feature. Then take up to
+15 minutes for your README, and tell us where you stopped.
 
 ## What to send back
 
