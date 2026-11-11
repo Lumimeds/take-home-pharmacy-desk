@@ -98,8 +98,8 @@ node sim/sim.mjs --target http://localhost:3000/webhooks --ping    # three event
 node sim/sim.mjs --target http://localhost:3000/webhooks           # the whole week
 ```
 
-The simulator needs Node 18 or newer and nothing else. **API key:** we'll email you one with a
-spending cap. Put it in `.env` and never commit it. You can use your own key if you prefer.
+The simulator needs Node 18 or newer and nothing else. **API key:** use your own, for any LLM
+provider you like. Put it in `.env` and never commit it. A week is only about ten emails, so it costs very little.
 
 ## 6 · How we evaluate
 
